@@ -1,5 +1,7 @@
 <h1>Curso com o prof Fernando Silva Maransatto - Youtube</h1>
 
+<a target='_blank' href='https://www.youtube.com/watch?v=642J5YzLXDk&list=PLWgD0gfm500EMEDPyb3Orb28i7HK5_DkR&index=1'>Playlist Curso API com Node.JS + Express + JWT + MySQL</a>
+
 <h2>Tecnologias abordadas.</h2>
 
 <h3>Instalando instância MySQL-MariaDB no Docker.</h3>
