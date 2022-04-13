@@ -42,11 +42,6 @@ Comandos SQL:
     > CREATE DATABASE ecommerce;
 </pre>
 
-depois
-
-<pre>
-use ecommerce;
-</pre>
 
 em seguida
 
