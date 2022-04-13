@@ -4,6 +4,8 @@
 
 <h3>Instalando instância MySQL-MariaDB no Docker.</h3>
 
+<p>Para isto devemos ter o docker previamente instalado. No meu caso os comandos abaixo são para um ambiente Linux Fedora 35 Workstation.</p>
+
 // Iniciando Docker
 
 <pre>
