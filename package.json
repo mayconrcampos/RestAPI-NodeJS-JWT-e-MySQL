@@ -1,0 +1,15 @@
+{
+  "name": "restapi-nodejs-jwt",
+  "version": "1.0.0",
+  "description": "RestAPI com NodeJS - JWT e MySQL",
+  "main": "index.js",
+  "scripts": {
+    "project": "nodemon index.js"
+  },
+  "author": "Maycon R Campos",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15"
+  }
+}
