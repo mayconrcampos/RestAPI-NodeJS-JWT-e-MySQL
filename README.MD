@@ -6,19 +6,27 @@
 
 // Iniciando Docker
 
-$ sudo systemctl start docker
+<pre>
+    $ sudo systemctl start docker
+<pre>
 
 // Baixando imagem do MariaDB
 
-$ docker pull mariadb
+<pre>
+    $ docker pull mariadb
+</pre>
 
 // Criando container mariadb com usuário root, senha root.
 
-$ docker run -p 3306:3306 --name mysql-mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb
+<pre>
+    $ docker run -p 3306:3306 --name mysql-mariadb -e MYSQL_ROOT_PASSWORD=root -d mariadb
+</pre>
 
 - Antes de criar o container com o comando acima, devo primeiro desligar meu mysql local com o comando.
 
-$ sudo systemctl stop mysqld
+<pre>
+    $ sudo systemctl stop mysqld
+</pre>
 
 // Agora vamos conectar ao banco de dados criado usando o workbench ou algum programa gerenciador de SGDB. No meu caso utilizei o Sequeler.
 
@@ -26,10 +34,15 @@ Pra fazer isto, selecione como host = localhost, porta 3306, user=root, senha=ro
 
 Comandos SQL:
 
-=> CREATE DATABASE ecommerce;
+<pre>
+    > CREATE DATABASE ecommerce;
+</pre>
 
 depois
-=> use ecommerce;
+
+<pre>
+use ecommerce;
+</pre>
 
 em seguida
 
@@ -56,12 +69,15 @@ Assim as tabelas serão criadas.
 
 // Inserindo um produto de teste
 
+<pre>
 insert into produtos (nome, preco) values ('Mouse Pad', 19.90);
+</pre>
 
 // Listando todos os produtos
 
+<pre>
 select * from produtos;
-
+</pre>
 
 <ul>
     <li>Rest API</li>
