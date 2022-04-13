@@ -22,8 +22,16 @@ router.get("/:id_pedido", (request, response, next) => {
 
 // Insere um pedido
 router.post("/", (request, response, next) => {
+    // Recebendo dados via POST - body
+    const pedido = {
+        "idProduto": request.body.idProduto,
+        "quantidade": request.body.quantidade,
+
+    }
+
     response.status(201).send({
-        mensagem: `POST - inserindo pedido`
+        mensagem: `POST - inserindo pedido`,
+        pedidoCriado: pedido
     })
 })
 

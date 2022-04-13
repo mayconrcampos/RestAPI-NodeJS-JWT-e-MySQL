@@ -21,8 +21,16 @@ router.get("/:id_produto", (request, response, next) => {
 
 // Insere um produto
 router.post("/", (request, response, next) => {
+    
+    // Criamos um objeto que vai receber os valores vindos do body, que é uma requisição via POST.
+    const produto = {
+        "nome": request.body.nome,
+        "preco": request.body.preco
+    }
+
     response.status(201).send({
-        mensagem: `POST - inserindo produto.`
+        mensagem: `POST - inserindo produto.`,
+        produtoCriado: produto
     })
 })
 
