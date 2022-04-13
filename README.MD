@@ -8,7 +8,7 @@
 
 <pre>
     $ sudo systemctl start docker
-<pre>
+</pre>
 
 // Baixando imagem do MariaDB
 
