@@ -4,7 +4,7 @@
   "description": "RestAPI com NodeJS - JWT e MySQL",
   "main": "index.js",
   "scripts": {
-    "project": "nodemon index.js"
+    "app": "nodemon server.js"
   },
   "author": "Maycon R Campos",
   "license": "ISC",
