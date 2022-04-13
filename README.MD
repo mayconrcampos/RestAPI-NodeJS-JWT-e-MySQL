@@ -33,6 +33,7 @@ depois
 
 em seguida
 
+<pre>
 create table IF NOT EXISTS ecommerce.produtos (
 	id INT(11) NOT NULL AUTO_INCREMENT,
 	nome VARCHAR(45) NOT NULL,
@@ -40,7 +41,8 @@ create table IF NOT EXISTS ecommerce.produtos (
 	PRIMARY KEY(id))
 ENGINE = InnoDB 
 DEFAULT CHARACTER SET = utf8;
-
+</pre>
+<pre>
 create table IF NOT EXISTS ecommerce.pedidos (
 	id INT(11) NOT NULL AUTO_INCREMENT,
 	id_produto INT(11) NOT NULL,
@@ -49,7 +51,7 @@ create table IF NOT EXISTS ecommerce.pedidos (
 	CONSTRAINT fk_pedidos_produtos
 	FOREIGN KEY(id_produto) REFERENCES produtos(id)
 )engine = InnoDB DEFAULT CHARACTER SET = utf8;
-
+</pre>
 Assim as tabelas serão criadas.
 
 // Inserindo um produto de teste
