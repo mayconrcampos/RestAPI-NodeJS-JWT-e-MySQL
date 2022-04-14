@@ -24,18 +24,27 @@ router.get("/", (request, response, next) => {
             })
         })
     })
-    
-    
-    
 })
 
 // Retorna dados de um produto
 router.get("/:id_produto", (request, response, next) => {
     const id = request.params.id_produto
+    DB.getConnection((error, conn) => {
+        conn.query(`SELECT * FROM produtos WHERE id=${id}`, (error, resultado, field) =>{
+            conn.release()
 
-    response.status(200).send({
-        mensagem: `GET - para retornar um produto pelo id ${id}`,
-        "id": id
+            if(error){
+                return resultado.status(500).send({
+                    "error": error,
+                    "response": null
+                })
+            }
+
+            response.status(200).send({
+                mensagem: `Listando apenas o produto com id=${id}`,
+                produto: resultado
+            })
+        })
     })
 })
 
