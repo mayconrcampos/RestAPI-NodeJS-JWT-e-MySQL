@@ -55,28 +55,38 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 </pre>
 <pre>
-create table IF NOT EXISTS ecommerce.pedidos (
-	id INT(11) NOT NULL AUTO_INCREMENT,
-	id_produto INT(11) NOT NULL,
-	preco FLOAT(11) NOT NULL,
-	PRIMARY KEY(id),
-	CONSTRAINT fk_pedidos_produtos
-	FOREIGN KEY(id_produto) REFERENCES produtos(id)
-)engine = InnoDB DEFAULT CHARACTER SET = utf8;
+    create table IF NOT EXISTS ecommerce.pedidos (
+    	id INT(11) NOT NULL AUTO_INCREMENT,
+    	id_produto INT(11) NOT NULL,
+    	preco FLOAT(11) NOT NULL,
+    	PRIMARY KEY(id),
+    	CONSTRAINT fk_pedidos_produtos
+    	FOREIGN KEY(id_produto) REFERENCES produtos(id)
+    )engine = InnoDB DEFAULT CHARACTER SET = utf8;
 </pre>
 Assim as tabelas serão criadas.
 
-// Inserindo um produto de teste
+
+
+Inserindo um produto de teste
 
 <pre>
-insert into produtos (nome, preco) values ('Mouse Pad', 19.90);
+    insert into produtos (nome, preco) values ('Mouse Pad', 19.90);
 </pre>
 
-// Listando todos os produtos
+Listando todos os produtos
 
 <pre>
-select * from produtos;
+    select * from produtos;
 </pre>
+
+Agora chegou o ponto em que vamos instalar o driver javascript para MySQL com o comando.
+
+<pre>
+    $ npm install --save mysql 
+</pre>
+
+
 
 <ul>
     <li>Rest API</li>
