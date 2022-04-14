@@ -192,15 +192,17 @@ router.delete("/", (request, res, next) => {
                     return res.status(500).send({"error": error})
                 }
 
+                if(result.affectedRows == 0){
+                    return res.status(404).send({"mensagem": "Produto não encontrado."})
+                }
+
                 const response = {
                     "mensagem": "Item excluido com sucesso",
                     "produto": {
                         "id": `http://localhost:3000/produtos/${id}`,
-                        "nome": produto.nome,
-                        "preco": produto.preco,
                         "request": {
                             "tipo": "DELETE",
-                            "descricao": "Deleta um produto",
+                            "descricao": "Deleta um produto pelo id",
                             "url": `http://localhost:3000/produtos/${id}`,
                         }
                     }
