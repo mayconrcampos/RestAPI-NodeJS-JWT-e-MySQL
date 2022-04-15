@@ -19,7 +19,8 @@ router.get("/", (req, res, next) => {
                     return {
                         "id": ped.id,
                         "nome": ped.id_produto,
-                        "preco": ped.preco,
+                        "quantidade": ped.preco,
+                        "total": ped.total,
                         "request": {
                             tipo: "GET",
                             descricao: "Retorna todos os pedidos",
@@ -57,7 +58,8 @@ router.get("/:id_pedido", (req, res, next) => {
                         return {
                             "id": ped.id,
                             "nome": ped.nome,
-                            "preco": ped.preco,
+                            "quantidade": ped.quantidade,
+                            "total": ped.quantidade,
                             "request": {
                                 tipo: "GET",
                                 descricao: `Retorna apenas pedido pelo id ${ped.id}`,
@@ -75,35 +77,55 @@ router.get("/:id_pedido", (req, res, next) => {
 
 // Insere um pedido
 router.post("/", (req, res, next) => {
-    if(!isNaN(req.body.id_produto) && !isNaN(req.body.preco)){
+    if(!isNaN(req.body.id_produto)){
         var pedido = {
             "id_produto": req.body.id_produto,
-            "preco": req.body.preco
+            "quantidade": req.body.quantidade
         }
-
-        if(pedido.id_produto > 0 && pedido.preco > 0){
-            DB.getConnection((error, conn) => {
-                conn.query("INSERT INTO pedidos (id_produto, preco) VALUES (?, ?)", [pedido.id_produto, pedido.preco], (error, result) => {
-                    conn.release()
+       
+        if(pedido.id_produto > 0){
+            // Verificar se existe id_produto na tabela de produtos
+            DB.getConnection((error, conn) =>{
+                conn.query("SELECT * FROM produtos WHERE id=?", pedido.id_produto, (error, result) => {
 
                     if(error){return res.status(500).send({"error": error})}
 
-                    const response = {
-                        "mensagem": "Pedido inserido com sucesso",
-                        "pedido": {
-                            "id": result.insertId,
-                            "id_produto": pedido.id_produto,
-                            "preco": pedido.preco,
-                            "request": {
-                                "tipo": "POST",
-                                "descricao": "Insere um pedido",
-                                "url": `http://localhost:3000/pedidos/${result.insertId}`
+                    
+                    if(result.length == 0){
+                        return res.status(404).send({
+                            "mensagem": "Erro ao inserir pedido.",
+                            "error": `Produto ID ${pedido.id_produto} não existe na tabela produtos.`})
+
+                    }else{
+                        var preco = result[0].preco
+                        var total = pedido.quantidade * preco
+                        
+                        conn.query("INSERT INTO pedidos (id_produto, quantidade, total) VALUES (?, ?, ?)", [pedido.id_produto, pedido.quantidade, total], (error, result) => {
+                            conn.release()
+        
+                            if(error){return res.status(500).send({"error": error})}
+        
+                            const response = {
+                                "mensagem": "Pedido inserido com sucesso",
+                                "pedido": {
+                                    "id": result.insertId,
+                                    "id_produto": pedido.id_produto,
+                                    "quantidade": pedido.quantidade,
+                                    "total": result.total,
+                                    "request": {
+                                        "tipo": "POST",
+                                        "descricao": "Insere um pedido",
+                                        "url": `http://localhost:3000/pedidos/${result.insertId}`
+                                    }
+                                }
                             }
-                        }
+                            return res.status(201).send(response)  
+                        })
+                        
                     }
-                    return res.status(201).send(response)
                 })
             })
+            
             
         }else{
             return res.status(500).send({
@@ -111,7 +133,7 @@ router.post("/", (req, res, next) => {
                 "error": "É preciso preencher os campos com valores numéricos acima de zero.",
                 "pedido": {
                     "idProduto": "Integer > 0",
-                    "preco": "Float > 0"
+                    "quantidade": "Integer > 0"
                 }
             })
         }
@@ -127,7 +149,8 @@ router.post("/", (req, res, next) => {
             "pedido": {
                 "id": "Integer",
                 "idProduto": "Integer",
-                "preco": "Float"
+                "quantidade": "Integer"
+            
             }
         })
     }
@@ -137,43 +160,61 @@ router.post("/", (req, res, next) => {
 
 router.patch("/", (req, res, next) => {
 
-    if(!isNaN(req.body.id) && !isNaN(req.body.id_produto) && !isNaN(req.body.preco)){
+    if(!isNaN(req.body.id) && !isNaN(req.body.id_produto) && !isNaN(req.body.quantidade)){
 
         var pedido = {
             "id": req.body.id,
             "id_produto": req.body.id_produto,
-            "preco": req.body.preco
+            "quantidade": req.body.quantidade,
         }
 
-        if(pedido.id > 0 && pedido.id_produto > 0 && pedido.preco > 0){
-            DB.getConnection((error, conn) => {
-                conn.query(`UPDATE pedidos SET id_produto=?, preco=? WHERE id=?`, [pedido.id_produto, pedido.preco, pedido.id], (error, result, field) => {
-                    conn.release()
-        
-                    if(error){
-                        return res.status(500).send({"error": error})
+        if(pedido.id > 0 && pedido.id_produto > 0 && pedido.quantidade > 0){
+            DB.getConnection((error, conn)=> {
+                conn.query("SELECT * FROM produtos WHERE id=?",pedido.id, (error, result)=> {
+                    if(error){return res.status(500).send({"error": error})}
+
+                    if(result.length == 0){
+                        return res.status(404).send({"mensagem": "Produto não encontrado."})
                     }
-                    if(result.affectedRows == 0){
-                        return res.status(404).send({"mensagem":`pedido não encontrado com id ${pedido.id}`})
-                    }
-                    const response = {
-                        "mensagem": "Item atualizado com sucesso",
-                        "pedido": {
-                            "id": pedido.id,
-                            "id_produto": pedido.id_produto,
-                            "preco": pedido.preco,
-                            "request": {
-                                "tipo": "PATCH",
-                                "descricao": "Atualiza um pedido",
-                                "url": `http://localhost:3000/pedidos/${pedido.id}`,
+                    var total = result[0].preco * pedido.quantidade
+                    console.log(total)
+                    /**
+                     * Ver aqui na segunda, patch, atualizar pedido
+                     * 
+                     */
+                    DB.getConnection((error, conn) => {
+                        conn.query(`UPDATE pedidos SET id_produto=?, quantidade=?, total=? WHERE id=?`, [pedido.id_produto, pedido.quantidade, total, pedido.id], (error, result, field) => {
+                            conn.release()
+                
+                            if(error){
+                                return res.status(500).send({"error": error})
                             }
-                        }
-                    }
-                    return res.status(202).send(response)
-                 
+                            if(result.affectedRows == 0){
+                                console.log(result)
+                                return res.status(404).send({"mensagem":`pedido não encontrado com id ${pedido.id}`})
+                            }
+                            const response = {
+                                "mensagem": "Item atualizado com sucesso",
+                                "pedido": {
+                                    "id": pedido.id,
+                                    "id_produto": pedido.id_produto,
+                                    "quantidade": pedido.quantidade,
+                                    "request": {
+                                        "tipo": "PATCH",
+                                        "descricao": "Atualiza um pedido",
+                                        "url": `http://localhost:3000/pedidos/${pedido.id}`,
+                                    }
+                                }
+                            }
+                            return res.status(202).send(response)
+                         
+                            
+                        })
+                    })
                     
                 })
             })
+            
         }else{
             return res.status(500).send({
                 "mensagem": "Erro ao atualizar pedido.",
