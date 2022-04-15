@@ -81,13 +81,13 @@ router.get("/:id_produto", (request, res, next) => {
 })
 
 // Insere um produto
-router.post("/", (request, res, next) => {
+router.post("/", (req, res, next) => {
     // Criamos um objeto que vai receber os valores vindos do body, que é uma requisição via POST.
-    if(!isNaN(request.body.preco) && request.body.preco !== false && request.body.preco > 0 && request.body.nome.length > 0){
+    if(!isNaN(req.body.preco) && req.body.preco !== false && req.body.preco > 0 && req.body.nome.length > 0){
         
         const produto = {
-            "nome": request.body.nome,
-            "preco": request.body.preco
+            "nome": req.body.nome,
+            "preco": req.body.preco
         }
         
         DB.getConnection((error, conn) => { 
