@@ -170,7 +170,7 @@ router.patch("/", (req, res, next) => {
 
         if(pedido.id > 0 && pedido.id_produto > 0 && pedido.quantidade > 0){
             DB.getConnection((error, conn)=> {
-                conn.query("SELECT * FROM produtos WHERE id=?",pedido.id, (error, result)=> {
+                conn.query("SELECT preco FROM produtos WHERE id=?",pedido.id_produto, (error, result)=> {
                     if(error){return res.status(500).send({"error": error})}
 
                     if(result.length == 0){
