@@ -8,7 +8,15 @@ router.get("/", (req, res, next) => {
     
     DB.getConnection((error, conn) => {
 
-        conn.query("SELECT * FROM pedidos", (error, result, field) => {
+        conn.query(`SELECT 	pedidos.id as id,
+                        pedidos.id_produto as id_produto,
+                        produtos.nome as nome,
+                        produtos.preco as preco,
+                        pedidos.quantidade as qtde,
+                        pedidos.total
+                    FROM pedidos
+                    INNER JOIN produtos
+                    ON produtos.id = pedidos.id_produto`, (error, result, field) => {
             conn.release()
             if(error){return res.status(500).send({"error": error})}
 
@@ -17,9 +25,13 @@ router.get("/", (req, res, next) => {
                 quantidade: result.length,
                 pedidos: result.map(ped => {
                     return {
-                        "id": ped.id,
-                        "nome": ped.id_produto,
-                        "quantidade": ped.preco,
+                        "id_pedido": ped.id,
+                        "produto": {
+                            "id_produto": ped.id_produto,
+                            "nome": ped.nome,
+                            "preco": ped.preco
+                        },
+                        "quantidade": ped.qtde,
                         "total": ped.total,
                         "request": {
                             tipo: "GET",
@@ -42,7 +54,16 @@ router.get("/:id_pedido", (req, res, next) => {
     if(!isNaN(id) && id > 0){
 
         DB.getConnection((error, conn) => {
-            conn.query("SELECT * FROM pedidos WHERE id=?", id, (error, result) =>{
+            conn.query(`SELECT 	pedidos.id as id,
+                            pedidos.id_produto as id_produto,
+                            produtos.nome as nome,
+                            produtos.preco as preco,
+                            pedidos.quantidade as qtde,
+                            pedidos.total
+                        FROM pedidos
+                        INNER JOIN produtos
+                        ON produtos.id = pedidos.id_produto
+                        WHERE pedidos.id=?`, id, (error, result) =>{
                 conn.release()
 
                 if(error){return res.status(500).send({"error": error})}
@@ -56,10 +77,14 @@ router.get("/:id_pedido", (req, res, next) => {
                     quantidade: result.length,
                     pedido: result.map(ped => {
                         return {
-                            "id": ped.id,
-                            "nome": ped.nome,
-                            "quantidade": ped.quantidade,
-                            "total": ped.quantidade,
+                            "id_pedido": ped.id,
+                            "produto": {
+                                "id_produto": ped.id_produto,
+                                "nome": ped.nome,
+                                "preco": ped.preco
+                            },
+                            "quantidade": ped.qtde,
+                            "total": ped.total,
                             "request": {
                                 tipo: "GET",
                                 descricao: `Retorna apenas pedido pelo id ${ped.id}`,
@@ -111,7 +136,7 @@ router.post("/", (req, res, next) => {
                                     "id": result.insertId,
                                     "id_produto": pedido.id_produto,
                                     "quantidade": pedido.quantidade,
-                                    "total": result.total,
+                                    "total": total,
                                     "request": {
                                         "tipo": "POST",
                                         "descricao": "Insere um pedido",
