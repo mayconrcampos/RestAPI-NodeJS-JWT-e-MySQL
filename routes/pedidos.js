@@ -12,6 +12,7 @@ router.get("/", (req, res, next) => {
                         pedidos.id_produto as id_produto,
                         produtos.nome as nome,
                         produtos.preco as preco,
+                        produtos.imagem_produto as imagem,
                         pedidos.quantidade as qtde,
                         pedidos.total
                     FROM pedidos
@@ -29,7 +30,8 @@ router.get("/", (req, res, next) => {
                         "produto": {
                             "id_produto": ped.id_produto,
                             "nome": ped.nome,
-                            "preco": ped.preco
+                            "preco": ped.preco,
+                            "imagem_produto": ped.imagem
                         },
                         "quantidade": ped.qtde,
                         "total": ped.total,
@@ -58,6 +60,7 @@ router.get("/:id_pedido", (req, res, next) => {
                             pedidos.id_produto as id_produto,
                             produtos.nome as nome,
                             produtos.preco as preco,
+                            produtos.imagem_produto as imagem,
                             pedidos.quantidade as qtde,
                             pedidos.total
                         FROM pedidos
@@ -81,7 +84,8 @@ router.get("/:id_pedido", (req, res, next) => {
                             "produto": {
                                 "id_produto": ped.id_produto,
                                 "nome": ped.nome,
-                                "preco": ped.preco
+                                "preco": ped.preco,
+                                "imagem": ped.imagem
                             },
                             "quantidade": ped.qtde,
                             "total": ped.total,

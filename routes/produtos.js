@@ -1,6 +1,37 @@
 const express = require("express")
 const router = express.Router()
 const DB = require("../database/DB").pool
+const multer = require("multer")
+
+// Criamos a pasta pra guardar as imagens
+const storage = multer.diskStorage({
+    // caminho relativo da imagem
+    "destination": function(req, file, callback) {
+        callback(null, "./uploads/")
+    },
+    // Setamos o nome que essa imagem irá receber ao ser salva
+    "filename": function(req, file, callback){
+        callback(null, new Date().toISOString() + file.originalname.replace(/ /g, "_"))
+    }
+})
+// Definimos um filtro para que somente receba jpeg ou png
+const fileFilter = (req, file, callback) => {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "imagem/png"){
+        callback(null, true)
+    }else{
+        callback(null, false)
+    }
+}
+
+const upload = multer({
+    "storage": storage,
+    "limits": {
+        "fileSize": 1024 * 1024 * 5,
+        // 1024 bytes * 1024 bytes = 1mb * 5 = 5mb
+        "fileFilter": fileFilter
+    }
+})
+
 
 
 // Retorna todos os produtos
@@ -22,6 +53,7 @@ router.get("/", (request, res, next) => {
                         "id": prod.id,
                         "nome": prod.nome,
                         "preco": prod.preco,
+                        "imagem_produto": prod.imagem_produto,
                         "request": {
                             tipo: "GET",
                             descricao: "Retorna todos os produtos",
@@ -60,6 +92,7 @@ router.get("/:id_produto", (request, res, next) => {
                             "id": prod.id,
                             "nome": prod.nome,
                             "preco": prod.preco,
+                            "imagem_produto": prod.imagem_produto,
                             "request": {
                                 tipo: "GET",
                                 descricao: `Retorna apenas produto com id ${prod.id}`,
@@ -81,21 +114,23 @@ router.get("/:id_produto", (request, res, next) => {
 })
 
 // Insere um produto
-router.post("/", (req, res, next) => {
+router.post("/", (upload.single("produto_imagem")), (req, res, next) => {
+   
     // Criamos um objeto que vai receber os valores vindos do body, que é uma requisição via POST.
     if(!isNaN(req.body.preco) && req.body.preco !== false && req.body.preco > 0 && req.body.nome.length > 0){
         
         const produto = {
             "nome": req.body.nome,
-            "preco": req.body.preco
+            "preco": req.body.preco,
+            "imagem_produto": req.file.path
         }
         
         DB.getConnection((error, conn) => { 
             if(error){return res.status(500).send({"error": error})}
             try {
                 conn.query(
-                    "INSERT INTO produtos (nome, preco) VALUES (? ,?)",
-                    [produto.nome, produto.preco], 
+                    "INSERT INTO produtos (nome, preco, imagem_produto) VALUES (?, ?, ?)",
+                    [produto.nome, produto.preco, produto.imagem_produto], 
                     (error, result, field) => {
                         // Assim que a query for executada e entrar nesse calback, é preciso liberar a conexão usando conn.release()
                         conn.release()
@@ -109,6 +144,7 @@ router.post("/", (req, res, next) => {
                                 "id": result.insertId,
                                 "nome": produto.nome,
                                 "preco": produto.preco,
+                                "imagem_produto": produto.imagem_produto,
                                 "request": {
                                     "tipo": "POST",
                                     "descricao": "Insere um produto",
@@ -141,15 +177,16 @@ router.post("/", (req, res, next) => {
 })
 
 // Atualiza um produto
-router.patch("/", (request, res, next) => {
+router.patch("/", (upload.single("produto_imagem")), (request, res, next) => {
     var produto = {
         "id": request.body.id,
         "nome": request.body.nome,
-        "preco": request.body.preco
+        "preco": request.body.preco,
+        "imagem_produto": request.file.path
     }
 
     DB.getConnection((error, conn) => {
-        conn.query(`UPDATE produtos SET nome=?, preco=? WHERE id=?`, [produto.nome, produto.preco, produto.id], (error, result, field) => {
+        conn.query(`UPDATE produtos SET nome=?, preco=?, imagem_produto=? WHERE id=?`, [produto.nome, produto.preco, produto.produto_imagem, produto.id], (error, result, field) => {
             conn.release()
 
             if(error){
@@ -164,6 +201,7 @@ router.patch("/", (request, res, next) => {
                     "id": produto.id,
                     "nome": produto.nome,
                     "preco": produto.preco,
+                    "imagem_produto": produto.imagem_produto,
                     "request": {
                         "tipo": "PATCH",
                         "descricao": "Atualiza um produto",
