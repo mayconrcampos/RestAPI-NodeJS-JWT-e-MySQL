@@ -58,7 +58,8 @@ DEFAULT CHARACTER SET = utf8;
     create table IF NOT EXISTS ecommerce.pedidos (
     	id INT(11) NOT NULL AUTO_INCREMENT,
     	id_produto INT(11) NOT NULL,
-    	preco FLOAT(11) NOT NULL,
+    	quantidade INT(11) NOT NULL,
+        total FLOAT(11) NOT NULL
     	PRIMARY KEY(id),
     	CONSTRAINT fk_pedidos_produtos
     	FOREIGN KEY(id_produto) REFERENCES produtos(id)
@@ -67,6 +68,19 @@ DEFAULT CHARACTER SET = utf8;
 Assim as tabelas serão criadas.
 
 
+Agora fazemos uma junção de tabelas INNER JOIN para trazermos todos os dados 
+em um get pedidos.
+<pre>
+SELECT 	pedidos.id,
+	pedidos.id_produto,
+	produtos.nome,
+	produtos.preco,
+	pedidos.quantidade,
+	pedidos.total
+FROM pedidos
+INNER JOIN produtos
+ON produtos.id = pedidos.id_produto;
+</pre>
 
 Inserindo um produto de teste
 
