@@ -82,6 +82,12 @@ INNER JOIN produtos
 ON produtos.id = pedidos.id_produto;
 </pre>
 
+Adicionando campo de imagem_produto na tabela produtos
+<pre>
+ALTER TABLE produtos
+ADD COLUMN imagem_produto VARCHAR(500);
+</pre>
+
 Inserindo um produto de teste
 
 <pre>
