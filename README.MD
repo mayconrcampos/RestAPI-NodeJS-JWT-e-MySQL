@@ -88,6 +88,16 @@ ALTER TABLE produtos
 ADD COLUMN imagem_produto VARCHAR(500);
 </pre>
 
+Adicionando tabela usuarios pra criar sistema de Login com JWT (Json Web Token)
+
+<pre>
+CREATE TABLE usuarios (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(256),
+    password VARCHAR(256)
+);
+</pre>
+
 Inserindo um produto de teste
 
 <pre>
