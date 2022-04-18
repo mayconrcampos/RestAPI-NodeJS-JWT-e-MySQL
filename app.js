@@ -2,9 +2,9 @@ const express = require("express")
 const app = express()
 const morgan = require("morgan")
 const bodyParser = require("body-parser")
-
 const rotaProdutos = require("./routes/produtos")
 const rotaPedidos = require("./routes/pedidos")
+const rotaUsuarios = require("./routes/usuarios")
 
 
 app.use(morgan("dev"))
@@ -12,6 +12,7 @@ app.use("/uploads", express.static("uploads"))
 app.use(bodyParser.urlencoded({extended: false})) // Apenas dados simples
 app.use(bodyParser.json()) // json de entrada body
 
+// Headers da aplicação
 app.use((request, response, next) => {
     response.header("Access-Control-Allow-Origin", "*")
     response.header("Access-Control-Allow-Header", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Length")
@@ -24,8 +25,10 @@ app.use((request, response, next) => {
     next()
 })
 
+// Rotas da API (Endpoints)
 app.use("/produtos", rotaProdutos)
 app.use("/pedidos", rotaPedidos)
+app.use("/usuarios", rotaUsuarios)
 
 // Tratamento para quando não encontrar nenhuma rota
 app.use((req, res, next) => {

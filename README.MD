@@ -93,8 +93,8 @@ Adicionando tabela usuarios pra criar sistema de Login com JWT (Json Web Token)
 <pre>
 CREATE TABLE usuarios (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(256),
-    password VARCHAR(256)
+    email VARCHAR(256) UNIQUE NOT NULL,
+    password VARCHAR(256) NOT NULL
 );
 </pre>
 
