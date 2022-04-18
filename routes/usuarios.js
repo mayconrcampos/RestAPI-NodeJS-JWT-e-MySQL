@@ -62,6 +62,8 @@ router.post("/login", (req, res, next) => {
                 if(error){ return res.status(500).send({"error": error}) }
 
                 if(results){
+
+                    // Geração do token JWT e tempo para expirar.
                     const token = jwt.sign({
                         "id": result[0].id,
                         "email": result[0].email
@@ -69,6 +71,7 @@ router.post("/login", (req, res, next) => {
                     }, /*process.env.JWT_KEY*/"secreto",{
                         "expiresIn": "1h"
                     })
+
                     return res.status(200).send({
                         "mensagem": "Autenticado com sucesso.",
                         "token": token
