@@ -50,20 +50,23 @@ router.post("/login", (req, res, next) => {
     DB.getConnection((error, conn) => {
         if(error){ return res.status(500).send({"error": error}) }
 
+        // Se chegou aqui, a query SELECT será executada pra ver se existe email de req.body.email
         conn.query("SELECT * FROM usuarios WHERE email = ?", req.body.email, (error, result) => {
             conn.release()
             if(error){ return res.status(500).send({"error": error}) }
 
+            // Se resultado for 0 , email não foi cadastrado ainda.
             if(result.length < 1){
                 return res.status(401).send({"mensagem": "Falha na autenticação."})
             }
 
+            // Se chegou aqui, bcrypt irá comparar password digitado com o password que veio do banco.
             bcrypt.compare(req.body.password, result[0].password, (error, results) => {
                 if(error){ return res.status(500).send({"error": error}) }
 
+                // Se chegou aqui, houve comparação e os resultados deram match.
                 if(results){
-
-                    // Geração do token JWT e tempo para expirar.
+                    // Geração do token JWT e tempo para expirar de 1h.
                     const token = jwt.sign({
                         "id": result[0].id,
                         "email": result[0].email
@@ -72,12 +75,14 @@ router.post("/login", (req, res, next) => {
                         "expiresIn": "1h"
                     })
 
+                    // Mensagem de autenticado com sucesso e o token gerado
                     return res.status(200).send({
                         "mensagem": "Autenticado com sucesso.",
                         "token": token
                     })
-                }
+                }   
 
+                // Se chegou aqui, houve comparação das senhas, mas estava errada.
                 return res.status(401).send({"mensagem": "Falha na autenticação."})
             })
         })

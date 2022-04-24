@@ -1,12 +1,14 @@
 const express = require("express")
 const router = express.Router()
 const DB = require("../database/DB").pool
+const login = require("../middleware/login")
 
 
 // Retorna todos os pedidos
-router.get("/", (req, res, next) => {
+router.get("/", login.opcional, (req, res, next) => {
     
     DB.getConnection((error, conn) => {
+        if(error){return res.status(500).send({"error": error})}
 
         conn.query(`SELECT 	pedidos.id as id,
                         pedidos.id_produto as id_produto,
@@ -50,12 +52,14 @@ router.get("/", (req, res, next) => {
 })
 
 // Retorna dados de um pedido
-router.get("/:id_pedido", (req, res, next) => {
+router.get("/:id_pedido", login.opcional, (req, res, next) => {
     const id = req.params.id_pedido
 
     if(!isNaN(id) && id > 0){
 
         DB.getConnection((error, conn) => {
+            if(error){return res.status(500).send({"error": error})}
+
             conn.query(`SELECT 	pedidos.id as id,
                             pedidos.id_produto as id_produto,
                             produtos.nome as nome,
@@ -105,7 +109,7 @@ router.get("/:id_pedido", (req, res, next) => {
 })
 
 // Insere um pedido
-router.post("/", (req, res, next) => {
+router.post("/", login.obrigatorio, (req, res, next) => {
     if(!isNaN(req.body.id_produto)){
         var pedido = {
             "id_produto": req.body.id_produto,
@@ -115,6 +119,8 @@ router.post("/", (req, res, next) => {
         if(pedido.id_produto > 0){
             // Verificar se existe id_produto na tabela de produtos
             DB.getConnection((error, conn) =>{
+                if(error){return res.status(500).send({"error": error})}
+
                 conn.query("SELECT * FROM produtos WHERE id=?", pedido.id_produto, (error, result) => {
 
                     if(error){return res.status(500).send({"error": error})}
@@ -187,7 +193,7 @@ router.post("/", (req, res, next) => {
 
 // Atualiza um pedido
 
-router.patch("/", (req, res, next) => {
+router.patch("/", login.obrigatorio, (req, res, next) => {
 
     if(!isNaN(req.body.id) && !isNaN(req.body.id_produto) && !isNaN(req.body.quantidade)){
 
@@ -199,6 +205,8 @@ router.patch("/", (req, res, next) => {
 
         if(pedido.id > 0 && pedido.id_produto > 0 && pedido.quantidade > 0){
             DB.getConnection((error, conn)=> {
+                if(error){return res.status(500).send({"error": error})}
+
                 conn.query("SELECT preco FROM produtos WHERE id=?",pedido.id_produto, (error, result)=> {
                     if(error){return res.status(500).send({"error": error})}
 
@@ -212,6 +220,8 @@ router.patch("/", (req, res, next) => {
                      * 
                      */
                     DB.getConnection((error, conn) => {
+                        if(error){return res.status(500).send({"error": error})}
+
                         conn.query(`UPDATE pedidos SET id_produto=?, quantidade=?, total=? WHERE id=?`, [pedido.id_produto, pedido.quantidade, total, pedido.id], (error, result, field) => {
                             conn.release()
                 
@@ -274,11 +284,13 @@ router.patch("/", (req, res, next) => {
 })
 
 // Deleta um pedido
-router.delete("/", (req, res, next) => {
+router.delete("/", login.obrigatorio, (req, res, next) => {
     var id = req.body.id
 
     if(!isNaN(id) && id > 0){
         DB.getConnection((error, conn) => {
+            if(error){return res.status(500).send({"error": error})}
+
             conn.query("DELETE FROM pedidos WHERE id=?", id, (error, result) => {
                 conn.release()
 

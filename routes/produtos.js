@@ -2,6 +2,9 @@ const express = require("express")
 const router = express.Router()
 const DB = require("../database/DB").pool
 const multer = require("multer")
+const localhost = "http://localhost:3000/"
+const login = require("../middleware/login")
+
 
 // Criamos a pasta pra guardar as imagens
 const storage = multer.diskStorage({
@@ -35,14 +38,21 @@ const upload = multer({
 
 
 // Retorna todos os produtos
-router.get("/", (request, res, next) => {
+router.get("/", login.opcional, (request, res, next) => {
     
     DB.getConnection((error, conn) => { 
+
+        if(error){return res.status(500).send({"error": error})}
+
         conn.query("SELECT * FROM produtos", (error, result, field) => {
             conn.release()
 
             if(error){
                 return res.status(500).send({"error": error})
+            }
+
+            if(result.length == 0){
+                return res.status(404).send({"error": "Não há produtos cadastrados."})
             }
 
             // Transformando um retorno simples em um retorno com mais detalhes
@@ -53,11 +63,11 @@ router.get("/", (request, res, next) => {
                         "id": prod.id,
                         "nome": prod.nome,
                         "preco": prod.preco,
-                        "imagem_produto": prod.imagem_produto,
+                        "imagem_produto": `${localhost}${prod.imagem_produto}`,
                         "request": {
                             tipo: "GET",
                             descricao: "Retorna todos os produtos",
-                            url: `http://localhost:3000/produtos/${prod.id}`
+                            url: `${localhost}produtos/${prod.id}`
                         }
                     }
                 })
@@ -69,11 +79,13 @@ router.get("/", (request, res, next) => {
 })
 
 // Retorna dados de um produto
-router.get("/:id_produto", (request, res, next) => {
+router.get("/:id_produto", login.opcional, (request, res, next) => {
     const id = request.params.id_produto
 
     if(!isNaN(id)){
         DB.getConnection((error, conn) => {
+            if(error){return res.status(500).send({"error": error})}
+
             conn.query(`SELECT * FROM produtos WHERE id=${id}`, (error, result, field) =>{
                 conn.release()
     
@@ -92,11 +104,11 @@ router.get("/:id_produto", (request, res, next) => {
                             "id": prod.id,
                             "nome": prod.nome,
                             "preco": prod.preco,
-                            "imagem_produto": prod.imagem_produto,
+                            "imagem_produto": `${localhost}${prod.imagem_produto}`,
                             "request": {
                                 tipo: "GET",
                                 descricao: `Retorna apenas produto com id ${prod.id}`,
-                                url: `http://localhost:3000/produtos/${prod.id}`
+                                url: `${localhost}produtos/${prod.id}`
                             }
                         }
                     })
@@ -114,7 +126,7 @@ router.get("/:id_produto", (request, res, next) => {
 })
 
 // Insere um produto
-router.post("/", (upload.single("produto_imagem")), (req, res, next) => {
+router.post("/", login.obrigatorio, (upload.single("produto_imagem")), (req, res, next) => {
    
     // Criamos um objeto que vai receber os valores vindos do body, que é uma requisição via POST.
     if(!isNaN(req.body.preco) && req.body.preco !== false && req.body.preco > 0 && req.body.nome.length > 0){
@@ -127,45 +139,33 @@ router.post("/", (upload.single("produto_imagem")), (req, res, next) => {
         
         DB.getConnection((error, conn) => { 
             if(error){return res.status(500).send({"error": error})}
-            try {
-                conn.query(
-                    "INSERT INTO produtos (nome, preco, imagem_produto) VALUES (?, ?, ?)",
-                    [produto.nome, produto.preco, produto.imagem_produto], 
-                    (error, result, field) => {
-                        // Assim que a query for executada e entrar nesse calback, é preciso liberar a conexão usando conn.release()
-                        conn.release()
-        
-                        if(error){ 
-                            return res.status(500).send({"error": error}) 
-                        }
-                        const response = {
-                            "mensagem": "Produto inserido com sucesso",
-                            "produto": {
-                                "id": result.insertId,
-                                "nome": produto.nome,
-                                "preco": produto.preco,
-                                "imagem_produto": produto.imagem_produto,
-                                "request": {
-                                    "tipo": "POST",
-                                    "descricao": "Insere um produto",
-                                    "url": `http://localhost:3000/produtos/${result.insertId}`
-                                }
+           
+            conn.query(
+                "INSERT INTO produtos (nome, preco, imagem_produto) VALUES (?, ?, ?)",
+                [produto.nome, produto.preco, produto.imagem_produto], 
+                (error, result, field) => {
+                    // Assim que a query for executada e entrar nesse calback, é preciso liberar a conexão usando conn.release()
+                    conn.release()
+    
+                    if(error){ 
+                        return res.status(500).send({"error": error}) 
+                    }
+                    const response = {
+                        "mensagem": "Produto inserido com sucesso",
+                        "produto": {
+                            "id": result.insertId,
+                            "nome": produto.nome,
+                            "preco": produto.preco,
+                            "imagem_produto": `${localhost}${produto.imagem_produto}`,
+                            "request": {
+                                "tipo": "POST",
+                                "descricao": "Insere um produto",
+                                "url": `${localhost}produtos/${result.insertId}`
                             }
                         }
-
-                        return res.status(201).send(response)
                     }
-                )
-            } catch (error) {
-                return res.status(500).send({
-                    code: 'ER_ACCESS_DENIED_ERROR',
-                    errno: 1045,
-                    sqlMessage: "Access denied for user ''@'172.17.0.1' (using password: NO)",
-                    sqlState: '28000',
-                    fatal: true
-                })
-            }
-            
+                    return res.status(201).send(response)
+            })
         })
 
     }else{
@@ -177,7 +177,7 @@ router.post("/", (upload.single("produto_imagem")), (req, res, next) => {
 })
 
 // Atualiza um produto
-router.patch("/", (upload.single("produto_imagem")), (request, res, next) => {
+router.patch("/", login.obrigatorio, (upload.single("produto_imagem")), (request, res, next) => {
     var produto = {
         "id": request.body.id,
         "nome": request.body.nome,
@@ -186,6 +186,8 @@ router.patch("/", (upload.single("produto_imagem")), (request, res, next) => {
     }
 
     DB.getConnection((error, conn) => {
+        if(error){return res.status(500).send({"error": error})}
+
         conn.query(`UPDATE produtos SET nome=?, preco=?, imagem_produto=? WHERE id=?`, [produto.nome, produto.preco, produto.produto_imagem, produto.id], (error, result, field) => {
             conn.release()
 
@@ -201,25 +203,24 @@ router.patch("/", (upload.single("produto_imagem")), (request, res, next) => {
                     "id": produto.id,
                     "nome": produto.nome,
                     "preco": produto.preco,
-                    "imagem_produto": produto.imagem_produto,
+                    "imagem_produto": `${localhost}${produto.imagem_produto}`,
                     "request": {
                         "tipo": "PATCH",
                         "descricao": "Atualiza um produto",
-                        "url": `http://localhost:3000/produtos/${produto.id}`,
+                        "url": `${localhost}produtos/${produto.id}`,
                     }
                 }
             }
             return res.status(202).send(response)
-         
-            
         })
     })
 
 })
 
 // Deleta um produto
-router.delete("/", (request, res, next) => {
+router.delete("/", login.obrigatorio, (request, res, next) => {
     var id = request.body.id
+
     if(!isNaN(id) && id !== 0){
         DB.getConnection((error, conn) => {
             if(error){return res.status(500).send({"error": error})}
@@ -237,11 +238,11 @@ router.delete("/", (request, res, next) => {
                 const response = {
                     "mensagem": "Item excluido com sucesso",
                     "produto": {
-                        "id": `http://localhost:3000/produtos/${id}`,
+                        "id": `${localhost}produtos/${id}`,
                         "request": {
                             "tipo": "DELETE",
                             "descricao": "Deleta um produto pelo id",
-                            "url": `http://localhost:3000/produtos/${id}`,
+                            "url": `${localhost}produtos/${id}`,
                         }
                     }
 
