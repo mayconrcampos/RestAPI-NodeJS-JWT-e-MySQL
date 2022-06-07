@@ -10,7 +10,7 @@ var pool = connection.createPool({
 
     // Esse é o modo simples pra estudos.
     "user": "root",
-    "password": "5DaJ10.,Xw,8",
+    "password": "",
     "host": "localhost",
     "port": 3306,
     "database": "ecommerce"
